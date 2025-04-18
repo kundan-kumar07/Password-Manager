@@ -1,0 +1,227 @@
+import React, { useState, useRef, useEffect } from "react";
+import { toast } from "react-toastify";
+import eye from "../assets/eye.svg";
+import eyeHide from "../assets/eye-hide.svg";
+
+const Manager = () => {
+  const passRef = useRef(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [form, setForm] = useState({ site: "", username: "", pass: "" });
+  const [passwordArray, setPasswordArray] = useState([]);
+  const [editIndex, setEditIndex] = useState(null); // 🔥 Track editing index
+
+  useEffect(() => {
+    let passwords = localStorage.getItem("passwords");
+    if (passwords) {
+      setPasswordArray(JSON.parse(passwords));
+    }
+  }, []);
+
+  useEffect(() => {
+    if (passRef.current) {
+      passRef.current.type = showPassword ? "text" : "password";
+    }
+  }, [showPassword]);
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleDelete = (indexToDelete) => {
+    const updatedPasswords = passwordArray.filter((_, index) => index !== indexToDelete);
+    setPasswordArray(updatedPasswords);
+    localStorage.setItem("passwords", JSON.stringify(updatedPasswords));
+    toast.info("Password deleted!");
+    if (editIndex === indexToDelete) {
+      setForm({ site: "", username: "", pass: "" });
+      setEditIndex(null);
+    }
+  };
+
+  const savePassword = () => {
+    // If form is empty, don't save or update
+    if (!form.site.trim() && !form.username.trim() && !form.pass.trim()) {
+      setForm({ site: "", username: "", pass: "" });
+      setEditIndex(null);
+      toast.warning("Empty form cannot be saved!");
+      return;
+    }
+
+    if (editIndex !== null) {
+      // 🔁 Edit mode
+      const updatedArray = [...passwordArray];
+      updatedArray[editIndex] = form;
+      setPasswordArray(updatedArray);
+      localStorage.setItem("passwords", JSON.stringify(updatedArray));
+      toast.success("Password updated!");
+    } else {
+      // ➕ Add mode
+      const newArray = [...passwordArray, form];
+      setPasswordArray(newArray);
+      localStorage.setItem("passwords", JSON.stringify(newArray));
+      toast.success("Password added!");
+    }
+
+    // ✅ Reset form & editIndex
+    setForm({ site: "", username: "", pass: "" });
+    setEditIndex(null);
+  };
+
+  const handleEdit = (index) => {
+    setForm(passwordArray[index]);
+    setEditIndex(index);
+  };
+
+  return (
+    <>
+     <div class="absolute top-0 z-[-2] h-screen w-screen bg-[#000000] bg-[radial-gradient(#ffffff33_1px,#00091d_1px)] bg-[size:20px_20px]"></div>
+
+      <div className="text-white flex flex-col p-4 bg-slate-800 max-w-2xl mx-auto mt-20">
+        <div className="flex flex-col gap-2 p-2">
+          <h1 className="font-extrabold text-center p-2">
+            Your Own Password Manager &lt;/&gt;
+          </h1>
+
+          <input
+            onChange={handleChange}
+            value={form.site}
+            name="site"
+            placeholder="Paste your website link here"
+            className="bg-amber-50 text-black rounded-full p-1.5 text-center"
+            type="text"
+          />
+
+          <input
+            onChange={handleChange}
+            value={form.username}
+            name="username"
+            placeholder="Enter the username"
+            className="bg-amber-50 text-black rounded-full p-1.5 text-center"
+            type="text"
+          />
+
+          <div className="relative w-full">
+            <input
+              ref={passRef}
+              onChange={handleChange}
+              value={form.pass}
+              name="pass"
+              placeholder="Enter your password"
+              className="bg-amber-50 text-black rounded-full p-1.5 pl-4 pr-10 w-full text-center"
+              type="password"
+            />
+            <img
+              src={showPassword ? eyeHide : eye}
+              alt="Toggle visibility"
+              onClick={() => setShowPassword((prev) => !prev)}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 cursor-pointer"
+            />
+          </div>
+
+          <div className="flex mx-auto bg-green-500 text-slate-800 p-2 rounded-4xl w-fit items-center justify-center gap-2 hover:bg-green-400 font-semibold border-2 border-green-600">
+            <lord-icon
+              src="https://cdn.lordicon.com/jgnvfzqg.json"
+              trigger="hover"
+              colors="primary:#000000"
+            ></lord-icon>
+            <button onClick={savePassword}>
+              {editIndex !== null ? "Update Password" : "Add Password"}
+            </button>
+          </div>
+        </div>
+
+        {/* Password List Table */}
+        <div className="password mt-10 p-2">
+          <h1 className="font-bold text-center mb-4">Your Passwords &lt;/&gt;</h1>
+          {passwordArray.length === 0 ? (
+            <div>No passwords to show</div>
+          ) : (
+            <div className="overflow-x-auto  md:block">
+  <table className="table-auto w-full border-collapse">
+    <thead className="bg-green-800 text-white">
+      <tr>
+        <th className="p-3 text-left">Site URL</th>
+        <th className="p-3 text-left">Username</th>
+        <th className="p-3 text-left">Password</th>
+        <th className="p-3 text-left">Action</th>
+      </tr>
+    </thead>
+    <tbody className="bg-amber-50 text-blue-950">
+      {passwordArray.map((item, index) => (
+        <tr key={index} className="border-t border-green-600">
+          <td className="p-3">
+            <div className="flex items-center gap-2">
+              {item.site}
+              <lord-icon
+                src="https://cdn.lordicon.com/depeqmsz.json"
+                onClick={() => {
+                  navigator.clipboard.writeText(item.site);
+                  toast.success("Site URL copied!");
+                }}
+                trigger="hover"
+                style={{ height: "20px", width: "20px", cursor: "pointer" }}
+              ></lord-icon>
+            </div>
+          </td>
+          <td className="p-3">
+            <div className="flex items-center gap-2">
+              {item.username}
+              <lord-icon
+                onClick={() => {
+                  navigator.clipboard.writeText(item.username);
+                  toast.success("Username copied!");
+                }}
+                src="https://cdn.lordicon.com/depeqmsz.json"
+                trigger="hover"
+                style={{ height: "20px", width: "20px", cursor: "pointer" }}
+              ></lord-icon>
+            </div>
+          </td>
+          <td className="p-3">
+            <div className="flex items-center gap-2">
+              {item.pass}
+              <lord-icon
+                onClick={() => {
+                  navigator.clipboard.writeText(item.pass);
+                  toast.success("Password copied!");
+                }}
+                src="https://cdn.lordicon.com/depeqmsz.json"
+                trigger="hover"
+                style={{ height: "20px", width: "20px", cursor: "pointer" }}
+              ></lord-icon>
+            </div>
+          </td>
+          <td className="p-3">
+            <div className="flex items-center gap-4">
+              <span className="flex items-center gap-1">
+                Delete
+                <lord-icon
+                  onClick={() => handleDelete(index)}
+                  src="https://cdn.lordicon.com/skkahier.json"
+                  trigger="hover"
+                  style={{ height: "20px", width: "20px", cursor: "pointer" }}
+                ></lord-icon>
+              </span>
+              <span className="flex items-center gap-1">
+                Edit
+                <i
+                  className="fa-solid fa-pen ml-1 cursor-pointer"
+                  onClick={() => handleEdit(index)}
+                ></i>
+              </span>
+            </div>
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+
+          )}
+        </div>
+      </div>
+    </>
+  );
+};
+
+export default Manager;

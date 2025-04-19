@@ -5,11 +5,6 @@ Features
 Add Passwords: Users can add their website URLs, usernames, and passwords.
 
 Edit Passwords: Users can edit previously saved passwords.
-## 📸 Code Snippet Preview
-
-![Snippet Preview]([https://collection.cloudinary.com/dp935trlf/933a7a77250a2fa174317c2625c4dd2c?])
-
-
 Delete Passwords: Users can delete passwords they no longer need.
 
 Copy Passwords: Passwords, usernames, and URLs can be copied to the clipboard for easy use.

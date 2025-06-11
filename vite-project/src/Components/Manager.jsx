@@ -11,7 +11,7 @@ const Manager = () => {
   const [passwordArray, setPasswordArray] = useState([]);
   const [editIndex, setEditIndex] = useState(null);
 
-  const API = "http://localhost:4000"; // Change if deployed
+  const API = "https://password-manager-backend-p1v6.onrender.com"; // Change if deployed
 
   // Fetch passwords from backend
   useEffect(() => {

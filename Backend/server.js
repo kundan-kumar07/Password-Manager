@@ -2,14 +2,15 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const app = express();
+require('dotenv').config();
 
 // Middleware
 app.use(cors());
 app.use(express.json());
-
+const uri =process.env.MONGO_URI;
 // MongoDB Connection
 mongoose
-  .connect("mongodb://127.0.0.1:27017/Password_Manager", {
+  .connect(uri, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
